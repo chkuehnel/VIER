@@ -4,11 +4,16 @@ import com.bu.haw.vier.util.SystemUiHider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 
 /**
@@ -18,7 +23,7 @@ import android.view.View;
  * @see SystemUiHider
  * Todo delete content of folder util!
  */
-public class StartActivity extends Activity {
+public class StartActivity extends Activity implements SensorEventListener{
 
     /**
      * todo: delete this shit until here
@@ -55,11 +60,19 @@ public class StartActivity extends Activity {
      * todo: delete this shit until here
      */
 
+    private SensorManager sensorManager;
+    double ax,ay,az;   // these are the acceleration in x,y and z axis
+    TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_start);
+
+        sensorManager=(SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        textView = (TextView) findViewById(R.id.example);
 
         /**
          * todo: delete this shit
@@ -103,7 +116,7 @@ public class StartActivity extends Activity {
                             controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
                         }
 
-                        if (visible && AUTO_HIDE) {
+                        if (visible) {
                             // Schedule a hide().
                             delayedHide(AUTO_HIDE_DELAY_MILLIS);
                         }
@@ -130,6 +143,22 @@ public class StartActivity extends Activity {
         /**
          * todo: delete this shit until here
          */
+    }
+
+
+
+    @Override
+    public void onAccuracyChanged(Sensor arg0, int arg1) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+            textView.setText(Float.toString(event.values[0]));
+            ax=event.values[0];
+            ay=event.values[1];
+            az=event.values[2];
+        }
     }
 
     @Override
