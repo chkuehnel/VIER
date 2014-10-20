@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$USER_HOME$/ownCloud/HAW/7.Semester/BU/Labor/VIER" />
-            <option value="$USER_HOME$/ownCloud/HAW/7.Semester/BU/Labor/VIER/app" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
       </GradleProjectSettings>

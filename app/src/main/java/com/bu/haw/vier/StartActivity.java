@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,12 +62,21 @@ public class StartActivity extends Activity implements SensorEventListener{
      */
 
     private SensorManager sensorManager;
-    double ax,ay,az;   // these are the acceleration in x,y and z axis
+    private MediaPlayer mediaPlayer;
+
+
+
+    private double ax,ay,az;   // these are the acceleration in x,y and z axis
+    private double max,min;
+
     TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        max = 0;
+        min = 100;
 
         setContentView(R.layout.activity_start);
 
@@ -98,7 +108,7 @@ public class StartActivity extends Activity implements SensorEventListener{
                             // If the ViewPropertyAnimator API is available
                             // (Honeycomb MR2 and later), use it to animate the
                             // in-layout UI controls at the bottom of the
-                            // screen.
+                            // screen.ur
                             if (mControlsHeight == 0) {
                                 mControlsHeight = controlsView.getHeight();
                             }
@@ -154,10 +164,28 @@ public class StartActivity extends Activity implements SensorEventListener{
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
-            textView.setText(Float.toString(event.values[0]));
             ax=event.values[0];
             ay=event.values[1];
             az=event.values[2];
+            textView.setText(String.format("x = %.2f \n" +
+                    "y = %.2f\n" +
+                    "z = %.2f\n" +
+                    "a = %.2f\n" +
+                    "min = %.2f\n" +
+                    "max = %.2f",event.values[0],event.values[1],event.values[2],Math.sqrt(ax*ax+ay*ay+az*az),min,max));
+
+            if(Math.sqrt(ax*ax+ay*ay+az*az)>max) max = Math.sqrt(ax*ax+ay*ay+az*az);
+            if(Math.sqrt(ax*ax+ay*ay+az*az)<min) min = Math.sqrt(ax*ax+ay*ay+az*az);
+
+
+            if(Math.sqrt(ax*ax+ay*ay+az*az)<2) {
+                mediaPlayer = MediaPlayer.create(this, R.raw.wilhelmscream_64kb);
+                mediaPlayer.start();
+            }
+            if(Math.sqrt(ax*ax+ay*ay+az*az)>20){
+                mediaPlayer = MediaPlayer.create(this, R.raw.goofy_holler);
+                mediaPlayer.start();
+            }
         }
     }
 
