@@ -2,8 +2,8 @@
 <resources>
 
     <string name="app_name">VIER</string>
-    <string name="title_activity_start">StartActivity</string>
-    <string name="dummy_button">lala</string>
+    <string name="title_activity_start">VIER</string>
+    <string name="dummy_button">start</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>
