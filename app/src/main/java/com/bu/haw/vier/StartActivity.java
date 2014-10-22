@@ -1,5 +1,6 @@
 package com.bu.haw.vier;
 
+import com.bu.haw.vier.data.dataObject;
 import com.bu.haw.vier.util.SystemUiHider;
 
 import android.annotation.TargetApi;
@@ -14,7 +15,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 
 /**
@@ -63,11 +67,12 @@ public class StartActivity extends Activity implements SensorEventListener{
 
     private SensorManager sensorManager;
     private MediaPlayer mediaPlayer;
-
-
+    private ArrayList beschleunigungsDaten;
+    private boolean startRecording;
 
     private double ax,ay,az;   // these are the acceleration in x,y and z axis
     private double max,min;
+    private Button dataStoreBtn;
 
     TextView textView;
 
@@ -79,10 +84,28 @@ public class StartActivity extends Activity implements SensorEventListener{
         min = 100;
 
         setContentView(R.layout.activity_start);
+        startRecording = false;
+        beschleunigungsDaten = new ArrayList();
 
         sensorManager=(SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
         textView = (TextView) findViewById(R.id.example);
+        dataStoreBtn = (Button) findViewById(R.id.dummy_button);
+
+        dataStoreBtn.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+                if(!startRecording) {
+                    startRecording = true;
+                    dataStoreBtn.setText("stop");
+                } else {
+                    startRecording = false;
+                    dataStoreBtn.setText("start");
+                }
+
+            }
+        });
 
         /**
          * todo: delete this shit
@@ -186,6 +209,10 @@ public class StartActivity extends Activity implements SensorEventListener{
                 mediaPlayer = MediaPlayer.create(this, R.raw.goofy_holler);
                 mediaPlayer.start();
             }
+
+
+            if(startRecording) beschleunigungsDaten.add(new dataObject(ax, ay, az));
+
         }
     }
 
