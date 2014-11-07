@@ -5,5 +5,7 @@
     <string name="title_activity_start">VIER</string>
     <string name="dummy_button">start</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="saveButtonText">Speichern</string>
+    <string name="nameFieldHint">Name</string>
 
 </resources>
