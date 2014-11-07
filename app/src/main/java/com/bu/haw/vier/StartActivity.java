@@ -6,6 +6,9 @@ import com.bu.haw.vier.data.dataObject;
 import com.bu.haw.vier.util.SystemUiHider;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -13,6 +16,7 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -26,12 +30,15 @@ import java.util.ArrayList;
  * @see SystemUiHider
  * Todo delete content of folder util!
  */
-public class StartActivity extends Activity implements SensorEventListener{
+public class StartActivity extends Activity implements SensorEventListener,
+        AdministrationFragment.AccountChoseListener{
 
     private SensorManager sensorManager;
     private MediaPlayer mediaPlayer;
     private ArrayList beschleunigungsDaten;
     private boolean startRecording;
+    private AdministrationFragment fragment;
+    private String fileName;
 
     private double ax,ay,az;   // these are the acceleration in x,y and z axis
     private double max,min;
@@ -52,6 +59,16 @@ public class StartActivity extends Activity implements SensorEventListener{
 
         initObjects();
         addListeners();
+
+        fragment = new AdministrationFragment(this);
+        startFragment(R.id.fragment_administration_container, fragment, AdministrationFragment.class.getName());
+    }
+
+    private void startFragment(int resource, Fragment fragment, String TAG) {
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(resource, fragment, TAG);
+        fragmentTransaction.commit();
     }
 
     private void initObjects() {
@@ -59,11 +76,9 @@ public class StartActivity extends Activity implements SensorEventListener{
         min = 100;
         startRecording = false;
         beschleunigungsDaten = new ArrayList();
-        textView = (TextView) findViewById(R.id.example);
         dataStoreBtn = (Button) findViewById(R.id.dummy_button);
 
         controller = new ExStorageController(this, false);
-        dataStorage = new DataStorage(controller.getFile("save.txt"));
 
     }
 
@@ -78,7 +93,9 @@ public class StartActivity extends Activity implements SensorEventListener{
                 } else {
                     startRecording = false;
                     dataStoreBtn.setText("start");
-                    dataStorage.writeToFile(beschleunigungsDaten);
+                    if (dataStorage.isFileValid()) {
+                        dataStorage.writeToFile(beschleunigungsDaten);
+                    }
                 }
 
             }
@@ -96,12 +113,6 @@ public class StartActivity extends Activity implements SensorEventListener{
             ax=event.values[0];
             ay=event.values[1];
             az=event.values[2];
-            textView.setText(String.format("x = %.2f \n" +
-                    "y = %.2f\n" +
-                    "z = %.2f\n" +
-                    "a = %.2f\n" +
-                    "min = %.2f\n" +
-                    "max = %.2f",event.values[0],event.values[1],event.values[2],Math.sqrt(ax*ax+ay*ay+az*az),min,max));
 
             if(Math.sqrt(ax*ax+ay*ay+az*az)>max) max = Math.sqrt(ax*ax+ay*ay+az*az);
             if(Math.sqrt(ax*ax+ay*ay+az*az)<min) min = Math.sqrt(ax*ax+ay*ay+az*az);
@@ -125,5 +136,14 @@ public class StartActivity extends Activity implements SensorEventListener{
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+    }
+
+    @Override
+    public void accountChanged(String accountName) {
+        this.fileName = accountName;
+        dataStorage = new DataStorage(controller.getFile(accountName));
+        // TODO: close Keyboard here
+        getFragmentManager().beginTransaction().
+                remove(getFragmentManager().findFragmentByTag(AdministrationFragment.class.getName())).commit();
     }
 }
