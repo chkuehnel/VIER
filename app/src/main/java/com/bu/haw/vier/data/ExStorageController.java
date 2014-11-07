@@ -5,6 +5,9 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 /**
  * Created by christian on 22.10.14.
@@ -40,6 +43,7 @@ public class ExStorageController {
     public File getPublicStorageDir(Context context) {
         if (isWritable){
                 // Get the public directory
+            // TODO: check min API
                 File file = context.getExternalFilesDir(null);
             if (!file.mkdirs()) {
                 Log.e(TAG, "Directory not created");
@@ -66,6 +70,17 @@ public class ExStorageController {
 
     public File getFile(String fileName){
         File file = new File(directoryPath, fileName);
+        // delete content of file if not empty
+        if (file.length() > 0) {
+            PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(file);
+                writer.print("");
+                writer.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
         return file;
     }
 }
