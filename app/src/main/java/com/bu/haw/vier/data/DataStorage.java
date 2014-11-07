@@ -45,4 +45,9 @@ public class DataStorage {
         this.storageFile = storageFile;
     }
 
+    // TODO: is needed any more?
+    public Boolean isFileValid() {
+        return storageFile != null;
+    }
+
 }
