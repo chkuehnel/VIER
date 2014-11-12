@@ -13,10 +13,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -48,6 +49,15 @@ public class StartActivity extends Activity implements SensorEventListener,
 
     DataStorage dataStorage;
     ExStorageController controller;
+
+    /**
+     * status of measurement:
+     * 0: IDLE
+     * 1: WAIT
+     * 2: MEASURE
+     * 3: SAVE
+     */
+    private int status = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,11 +98,13 @@ public class StartActivity extends Activity implements SensorEventListener,
             @Override
             public void onClick(View view) {
                 if(!startRecording) {
-                    startRecording = true;
                     dataStoreBtn.setText("stop");
+                    status = 1;
+                    measurement();
                 } else {
                     startRecording = false;
                     dataStoreBtn.setText("start");
+                    status = 0;
                     if (dataStorage.isFileValid()) {
                         dataStorage.writeToFile(beschleunigungsDaten);
                     }
@@ -100,8 +112,49 @@ public class StartActivity extends Activity implements SensorEventListener,
 
             }
         });
+
+
     }
 
+    private void measurement() {
+
+        ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 50);
+        switch (status) {
+            case 1: performDelay(2000);
+                break;
+            case 2:
+                startRecording = true;
+                // send the tone to the "alarm" stream (classic beeps go there) with 50% volume
+                toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200); // 200 is duration in ms
+                performDelay(7000);
+                break;
+            case 3:
+                toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200); // 200 is duration in ms
+                dataStoreBtn.performClick();
+                break;
+        }
+
+    }
+
+    private void performDelay(long delay) {
+        //Test code to measure communication cycles per second.
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                status++;
+                                measurement();
+                            }
+                        });
+                    }
+
+                },
+                delay
+        );
+    }
 
     @Override
     public void onAccuracyChanged(Sensor arg0, int arg1) {
@@ -117,7 +170,7 @@ public class StartActivity extends Activity implements SensorEventListener,
             if(Math.sqrt(ax*ax+ay*ay+az*az)>max) max = Math.sqrt(ax*ax+ay*ay+az*az);
             if(Math.sqrt(ax*ax+ay*ay+az*az)<min) min = Math.sqrt(ax*ax+ay*ay+az*az);
 
-
+/*
             if(Math.sqrt(ax*ax+ay*ay+az*az)<2) {
                 mediaPlayer = MediaPlayer.create(this, R.raw.wilhelmscream_64kb);
                 mediaPlayer.start();
@@ -126,7 +179,7 @@ public class StartActivity extends Activity implements SensorEventListener,
                 mediaPlayer = MediaPlayer.create(this, R.raw.goofy_holler);
                 mediaPlayer.start();
             }
-
+*/
 
             if(startRecording) beschleunigungsDaten.add(new dataObject(ax, ay, az));
 
