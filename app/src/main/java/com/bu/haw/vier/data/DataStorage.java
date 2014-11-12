@@ -1,15 +1,8 @@
 package com.bu.haw.vier.data;
 
-import android.content.Context;
-import android.util.Log;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -24,19 +17,18 @@ public class DataStorage {
 
     public void writeToFile(ArrayList<dataObject> dataList){
 
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(storageFile);
+
+        PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(storageFile);
             for (dataObject dataSet : dataList){
                 String line = dataSet.getAx() + ";" + dataSet.getAy() + ";" + dataSet.getAz() + "\n";
-                byte[] data = line.getBytes();
-                fos.write(data);
-                fos.flush();
+                writer.append(line);
+                writer.flush();
+
             }
-            fos.close();
+            writer.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
